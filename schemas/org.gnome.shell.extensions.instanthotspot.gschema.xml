@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.instanthotspot" path="/org/gnome/shell/extensions/instanthotspot/">
+    <!-- See also: https://docs.gtk.org/glib/gvariant-format-strings.html -->
+    <key name="indicator-visible" type="b">
+      <default>false</default>
+    </key>
+    <key name="phone-mac" type="s">
+      <default>''</default>
+    </key>
+    <key name="hotspot-ssid" type="s">
+      <default>''</default>
+    </key>
+  </schema>
+</schemalist>
