@@ -1,8 +1,8 @@
 {
   "name": "Instant Hotspot",
-  "description": "Turn on and connect to phone hotspot",
-  "uuid": "techtino@techtino.co.uk",
+  "description": "Connect to a mobile hotspot instantly",
+  "uuid": "instanthotspot@techtino.co.uk",
   "shell-version": [
-    "43"
+    "45"
   ]
 }

@@ -1,17 +1,51 @@
-const {Gio, NM, GObject, GLib, GnomeBluetooth} = imports.gi;
-const QuickSettings = imports.ui.quickSettings;
-// This is the live instance of the Quick Settings menu
-const QuickSettingsMenu = imports.ui.main.panel.statusArea.quickSettings;
-const NMClient = NM.Client.new (null); 
+/* extension.js
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+import GObject from 'gi://GObject';
+import Gio from 'gi://Gio';
+import NM from 'gi://NM';
+import GLib from 'gi://GLib';
+
+const NMClient = NM.Client.new (null);
+
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
+import {QuickToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
+
+
+const QuickSettingsMenu = Main.panel.statusArea.quickSettings;
 
 // Get the phone's hotspot ssid + the phone bluetooth mac address from the user, we can't magically get these.
 const settings = new Gio.Settings({schema_id: 'org.gnome.shell.extensions.instanthotspot',});
 const hotspot_ssid = settings.get_string('hotspot-ssid')
 const phone_mac = settings.get_string('phone-mac')
 
-// Define the quick settings toggle object
-const FeatureToggle = GObject.registerClass(
-class FeatureToggle extends QuickSettings.QuickToggle {
+const HotspotToggle = GObject.registerClass(
+class HotspotToggle extends QuickToggle {
+    //constructor() {
+    //    super({
+     //       title: _('Instant Hotspot'),
+     //       iconName: 'network-cellular-disabled-symbolic',
+     //       toggleMode: true,
+     //   });
+    //}
+
     _init() {
         super._init({
             iconName: 'network-cellular-disabled-symbolic',
@@ -55,11 +89,10 @@ class FeatureToggle extends QuickSettings.QuickToggle {
             this.set({checked : false})
         }
     }
-
 });
 
-const FeatureIndicator = GObject.registerClass(
-class FeatureIndicator extends QuickSettings.SystemIndicator {
+const HotspotIndicator = GObject.registerClass(
+class HotspotIndicator extends SystemIndicator {
     _init() {
         super._init();
 
@@ -78,16 +111,16 @@ class FeatureIndicator extends QuickSettings.SystemIndicator {
         
         // Create the toggle and associate it with the indicator, being sure to
         // destroy it along with the indicator
-        this.quickSettingsItems.push(new FeatureToggle());
+        this.quickSettingsItems.push(new HotspotToggle());
 
-        QuickSettingsMenu._indicators.insert_child_at_index(this, 0);
-        QuickSettingsMenu._addItems(this.quickSettingsItems);
+        //QuickSettingsMenu._indicators.insert_child_at_index(this, 0);
+        //QuickSettingsMenu._addItems(this.quickSettingsItems);
 
         // Ensure the tile(s) are above the background apps menu
-        for (const item of this.quickSettingsItems) {
-            QuickSettingsMenu.menu._grid.set_child_below_sibling(item,
-                QuickSettingsMenu._bluetooth.quickSettingsItems[0]);
-        }
+        //for (const item of this.quickSettingsItems) {
+        //    QuickSettingsMenu.menu._grid.set_child_below_sibling(item,
+        //        QuickSettingsMenu._bluetooth.quickSettingsItems[0]);
+        //}
     }
 
     destroy() {
@@ -99,23 +132,16 @@ class FeatureIndicator extends QuickSettings.SystemIndicator {
     }
 });
 
-class Extension {
-    constructor() {
-        this._indicator = null;
-    }
-    
+export default class InstantHotspotExtension extends Extension {
     enable() {
-        this._indicator = new FeatureIndicator();
+        this._indicator = new HotspotIndicator();
+        Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
     }
-    
-    disable() {
-        this._indicator.destroy();
-        this._indicator = null;
-    }
-}
 
-function init() {
-    return new Extension();
+    disable() {
+        this._indicator.quickSettingsItems.forEach(item => item.destroy());
+        this._indicator.destroy();
+    }
 }
 
 /// Useful functions
